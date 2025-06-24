@@ -35,6 +35,6 @@ Ideal para sysadmins que querem economizar tempo com tarefas repetitivas e aumen
 ## 📦 Instalação
 
 ```bash
-curl -o admin_menu.sh https://raw.githubusercontent.com/seu-usuario/seu-repo/main/admin_menu.sh
+curl -o admin_menu.sh https://raw.githubusercontent.com/guilhermepachecod/sysadmin/main/admin_menu.sh
 chmod +x admin_menu.sh
 ./admin_menu.sh
