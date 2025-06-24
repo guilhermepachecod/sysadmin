@@ -1,23 +1,19 @@
 #!/bin/bash
 
-# Caminhos e configurações
-SCRIPT_URL="https://raw.githubusercontent.com/guilhermepachecod/sysadmin/main/admin_menu.sh" 
+SCRIPT_URL="https://raw.githubusercontent.com/guilhermepachecod/sysadmin/main/admin_menu.sh"
 SCRIPT_PATH="$(realpath "$0")"
 DEPENDENCIAS=(systemctl exim proftpd csf curl)
 
-# Cores
 GREEN="\e[32m"
 RED="\e[31m"
 YELLOW="\e[33m"
 RESET="\e[0m"
 
-# Verificar se está rodando como root
 if [ "$EUID" -ne 0 ]; then
   echo -e "${RED}Este script precisa ser executado como root.${RESET}"
   exit 1
 fi
 
-# Verificar dependências
 FALTANDO=()
 for cmd in "${DEPENDENCIAS[@]}"; do
   if ! command -v "$cmd" &>/dev/null; then
@@ -26,23 +22,19 @@ for cmd in "${DEPENDENCIAS[@]}"; do
 done
 
 if [ "${#FALTANDO[@]}" -ne 0 ]; then
-  echo -e "${RED}Faltam as seguintes dependências para o script funcionar:${RESET}"
+  echo -e "${RED}Faltam as seguintes dependências:${RESET}"
   for item in "${FALTANDO[@]}"; do
     echo "- $item"
   done
-  echo -e "\nInstale os pacotes acima e execute o script novamente."
   exit 1
 fi
 
-# Caminhos padrão de logs e arquivos
 CSF_DENY="/etc/csf/csf.deny"
 EXIM_LOG="/var/log/exim_mainlog"
 PROFTPD_LOG="/var/log/proftpd/proftpd.log"
 CSF_LOG="/var/log/lfd.log"
 PROFTPD_CONF="/etc/proftpd.conf"
 CPANEL_UPDATE="/scripts/upcp"
-
-# Funções
 
 view_logs() {
   echo -e "${GREEN}1) Exim mainlog\n2) ProFTPD log\n3) CSF LFD log${RESET}"
@@ -108,4 +100,45 @@ update_self() {
   TMP_FILE=$(mktemp)
 
   if curl -fsSL "$SCRIPT_URL" -o "$TMP_FILE"; then
-    echo "Backup do script atual em $
+    echo "Backup do script atual em ${SCRIPT_PATH}.bak"
+    cp "$SCRIPT_PATH" "${SCRIPT_PATH}.bak"
+    mv "$TMP_FILE" "$SCRIPT_PATH"
+    chmod +x "$SCRIPT_PATH"
+    echo -e "${GREEN}Atualização concluída! Reinicie o script para aplicar as mudanças.${RESET}"
+  else
+    echo -e "${RED}Erro ao baixar o script. Verifique o link ou a conexão.${RESET}"
+    rm -f "$TMP_FILE"
+  fi
+}
+
+while true; do
+  clear
+  echo -e "${GREEN}=== MENU DE ADMINISTRAÇÃO DO SERVIDOR ===${RESET}"
+  echo "1) Visualizar logs"
+  echo "2) Editar arquivos de configuração"
+  echo "3) Reiniciar serviços"
+  echo "4) Descongelar fila do Exim"
+  echo "5) Ver fila de e-mails do Exim"
+  echo "6) Ver status de serviços"
+  echo "7) Atualizar cPanel"
+  echo "8) Atualizar este script via internet"
+  echo "0) Sair"
+  echo "---------------------------------------"
+  read -p "Escolha uma opção: " CHOICE
+
+  case $CHOICE in
+    1) view_logs ;;
+    2) edit_files ;;
+    3) restart_services ;;
+    4) unfreeze_exim_queue ;;
+    5) show_exim_queue ;;
+    6) check_services_status ;;
+    7) update_cpanel ;;
+    8) update_self ;;
+    0) echo "Saindo..."; break ;;
+    *) echo -e "${RED}Opção inválida!${RESET}"; sleep 2 ;;
+  esac
+
+  echo -e "\nPressione ENTER para voltar ao menu..."
+  read
+done
