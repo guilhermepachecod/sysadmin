@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Caminhos e configurações
-SCRIPT_URL="https://github.com/guilhermepachecod/sysadmin/admin_menu.sh" 
+SCRIPT_URL="https://github.com/guilhermepachecod/sysadmin/blob/main/admin_menu.sh" 
 SCRIPT_PATH="$(realpath "$0")"
 DEPENDENCIAS=(systemctl exim proftpd csf curl)
 
